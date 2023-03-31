@@ -36,6 +36,7 @@ contract ProximityProtocol is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     bool public ALLOW_TRANSFER;
+    mapping(address => bool) public confirmedMembership;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, and `PAUSER_ROLE` to the account that
@@ -68,6 +69,11 @@ contract ProximityProtocol is
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         // The default admin role is required to perform upgrades.
+    }
+
+    // A convenience function that allows one to confirm membership. This is meant to support voting.
+    function confirmMembership() public {
+        confirmedMembership[_msgSender()] = true;
     }
 
 
