@@ -19,6 +19,10 @@ const config: HardhatUserConfig = {
       },
       gas: 8000000,
     },
+    goerli: {
+      url: process.env.GOERLI_URL,
+      accounts: [process.env.PRIVATE_KEY],
+    },
   },
   solidity: {
     version: "0.8.9",

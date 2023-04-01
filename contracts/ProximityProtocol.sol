@@ -37,6 +37,7 @@ contract ProximityProtocol is
 
     bool public ALLOW_TRANSFER;
     mapping(address => bool) public confirmedMembership;
+    mapping(address => uint256) public nftId;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, and `PAUSER_ROLE` to the account that
@@ -98,6 +99,7 @@ contract ProximityProtocol is
         // );
 
         _mint(to, id, amount, data);
+        nftId[to] = id;
     }
 
     /**

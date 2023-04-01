@@ -32,3 +32,5 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
+
+proximity protocol deployed at: 0x441cB156A7D11CCA0922Ef1d9b66e8c0BC5674fe
