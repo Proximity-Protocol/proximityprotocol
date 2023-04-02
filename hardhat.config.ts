@@ -52,10 +52,10 @@ task("deploy", "Deploy the ProximityProtocol and ProximityProtocolGlobal contrac
     await ProximityProtocolProxy.deployed();
     console.log("ProximityProtocol deployed at:", ProximityProtocolProxy.address);
 
-    // const ProximityProtocolGlobal = await ethers.getContractFactory("ProximityProtocolGlobal");
-    // const ProximityProtocolGlobalProxy = await upgrades.deployProxy(ProximityProtocolGlobal, ["https://example.com", ProximityProtocolProxy.address], { initializer: "initialize" });
-    // await ProximityProtocolGlobalProxy.deployed();
-    // console.log("ProximityProtocolGlobal deployed at:", ProximityProtocolGlobalProxy.address);
+    const ProximityProtocolGlobal = await ethers.getContractFactory("ProximityProtocolGlobal");
+    const ProximityProtocolGlobalProxy = await upgrades.deployProxy(ProximityProtocolGlobal, ["https://example.com", ProximityProtocolProxy.address], { initializer: "initialize" });
+    await ProximityProtocolGlobalProxy.deployed();
+    console.log("ProximityProtocolGlobal deployed at:", ProximityProtocolGlobalProxy.address);
   });
 
 export default config;
