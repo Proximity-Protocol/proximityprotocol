@@ -97,7 +97,7 @@ contract ProximityProtocol is
         //     hasRole(MINTER_ROLE, _msgSender()),
         //     "ProximityProtocol: must have minter role to mint"
         // );
-
+        // require(nftId[to] == 0, "NFT already minted");
         _mint(to, id, amount, data);
         nftId[to] = id;
     }
