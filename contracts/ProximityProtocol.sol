@@ -3,11 +3,11 @@
 
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @dev {ERC1155} token, including:
@@ -26,26 +26,57 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * _Deprecated in favor of https://wizard.openzeppelin.com/[Contracts Wizard]._
  */
 contract ProximityProtocol is
-    Context,
-    AccessControlEnumerable,
-    ERC1155Burnable,
-    ERC1155Pausable
+    ContextUpgradeable,
+    AccessControlEnumerableUpgradeable,
+    ERC1155BurnableUpgradeable,
+    ERC1155PausableUpgradeable,
+    UUPSUpgradeable
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    bool public ALLOW_TRANSFER = false;
+    bool public ALLOW_TRANSFER;
+    mapping(address => bool) public confirmedMembership;
+    mapping(address => uint256) public nftId;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, and `PAUSER_ROLE` to the account that
      * deploys the contract.
      */
-    constructor(string memory uri) ERC1155(uri) {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    // constructor(string memory uri) ERC1155(uri) {
+    //     _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
+    //     _setupRole(MINTER_ROLE, _msgSender());
+    //     _setupRole(PAUSER_ROLE, _msgSender());
+    // }
+    function initialize(string memory uri) public initializer {
+        __Context_init();
+        __AccessControlEnumerable_init();
+        __ERC1155_init(uri);
+        __ERC1155Burnable_init();
+        __ERC1155Pausable_init();
+        __UUPSUpgradeable_init();
+
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
+        ALLOW_TRANSFER = false;
     }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        view
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        // The default admin role is required to perform upgrades.
+    }
+
+    // A convenience function that allows one to confirm membership. This is meant to support voting.
+    function confirmMembership() public {
+        confirmedMembership[_msgSender()] = true;
+    }
+
 
     /**
      * @dev Creates `amount` new tokens for `to`, of token type `id`.
@@ -62,12 +93,13 @@ contract ProximityProtocol is
         uint256 amount,
         bytes memory data
     ) public virtual {
-        require(
-            hasRole(MINTER_ROLE, _msgSender()),
-            "ProximityProtocol: must have minter role to mint"
-        );
-
+        // require(
+        //     hasRole(MINTER_ROLE, _msgSender()),
+        //     "ProximityProtocol: must have minter role to mint"
+        // );
+        // require(nftId[to] == 0, "NFT already minted");
         _mint(to, id, amount, data);
+        nftId[to] = id;
     }
 
     /**
@@ -190,7 +222,7 @@ contract ProximityProtocol is
         public
         view
         virtual
-        override(AccessControlEnumerable, ERC1155)
+        override(AccessControlEnumerableUpgradeable, ERC1155Upgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -203,7 +235,7 @@ contract ProximityProtocol is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal virtual override(ERC1155, ERC1155Pausable) {
+    ) internal virtual override(ERC1155Upgradeable, ERC1155PausableUpgradeable) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 }
